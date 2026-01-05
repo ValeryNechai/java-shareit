@@ -6,22 +6,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Builder
-public class ItemDto {
-    @NotNull(message = "id не может быть null.")
-    private Long id;
-
+public class OwnerItemsDto {
     @NotBlank(message = "Название вещи не может быть пустым или null.")
     private String name;
 
     @NotNull(message = "Описание вещи не может быть null.")
     @Size(min = 3, max = 255, message = "Описание должно быть от 3 до 255 символов.")
     private String description;
-
-    @NotNull(message = "Доступность вещи должна быть указана.")
-    private Boolean available;
 }

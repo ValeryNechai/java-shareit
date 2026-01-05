@@ -3,18 +3,10 @@ package ru.practicum.shareit.item.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
-@Builder
-public class ItemDto {
-    @NotNull(message = "id не может быть null.")
-    private Long id;
-
+public class NewItemRequest {
     @NotBlank(message = "Название вещи не может быть пустым или null.")
     private String name;
 
