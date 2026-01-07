@@ -1,19 +1,26 @@
 package ru.practicum.shareit.user.dao;
 
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserDao {
-    UserDto createUser(NewUserRequest user);
+    User createUser(NewUserRequest user);
 
-    UserDto updateUser(Long userId, UpdateUserRequest newUser);
+    User updateUser(Long userId, UpdateUserRequest newUser);
 
-    Collection<UserDto> getAllUsers();
+    Collection<User> getAllUsers();
 
-    UserDto getUser(Long id);
+    Optional<User> getUser(Long id);
 
     void deleteUser(Long userId);
+
+    boolean isExistUserWithThisEmail(NewUserRequest newUser);
+
+    boolean isExistUserWithThisEmail(String email);
+
+    Optional<User> isExistUser(Long userId);
 }

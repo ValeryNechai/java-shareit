@@ -1,20 +1,20 @@
 package ru.practicum.shareit.item.dao;
 
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.OwnerItemsDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface ItemDao {
-    ItemDto createItem(NewItemRequest item, Long ownerId);
+    Item createItem(NewItemRequest item, Long ownerId);
 
-    ItemDto updateItem(Long userId, UpdateItemRequest request, Long itemId);
+    Item updateItem(Long userId, UpdateItemRequest request, Long itemId);
 
-    ItemDto getItem(Long itemId);
+    Optional<Item> getItem(Long itemId);
 
-    Collection<OwnerItemsDto> getOwnerItems(Long ownerId);
+    Collection<Item> getOwnerItems(Long ownerId);
 
-    Collection<ItemDto> searchItem(String text);
+    Collection<Item> searchItem(String text);
 }

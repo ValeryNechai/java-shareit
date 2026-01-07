@@ -1,7 +1,5 @@
 package ru.practicum.shareit.user;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,13 +11,7 @@ import lombok.EqualsAndHashCode;
 @Builder
 @EqualsAndHashCode(of = {"email"})
 public class User {
-    @NotNull(message = "id не может быть null.")
     private Long id;
-
-    @NotNull(message = "Имя пользователя не может быть пустым!")
     private String name;
-
-    @NotNull(message = "Email не может быть пустым!")
-    @Email(message = "Некорректный email!")
     private String email;
 }

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.OwnerItemsDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -43,7 +42,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<OwnerItemsDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public Collection<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
         return itemService.getOwnerItems(ownerId);
     }
 
