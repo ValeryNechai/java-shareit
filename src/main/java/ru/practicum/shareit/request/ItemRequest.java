@@ -3,9 +3,7 @@ package ru.practicum.shareit.request;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -15,13 +13,16 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "requests")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull(message = "id не может быть null.")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotNull(message = "Описание запрашиваемой вещи не может быть null.")

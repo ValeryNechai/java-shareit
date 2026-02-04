@@ -41,5 +41,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and b.item.id = ?2 " +
             "and b.status = 'APPROVED' " +
             "order by b.end desc")
-    List<Booking> findByBookerIdAndItemIdAndStatus(Long bookerId, Long itemId);
+    List<Booking> findByBookerIdAndItemIdAndStatusApproved(Long bookerId, Long itemId);
 }

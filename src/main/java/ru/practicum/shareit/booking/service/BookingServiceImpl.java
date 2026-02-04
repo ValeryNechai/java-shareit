@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.dao.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(NewBookingRequest newBooking, Long bookerId) {
-        User booker = validationUser(bookerId);
+        User booker = validateUser(bookerId);
         Item item = validateItem(newBooking.getItemId());
         validateBookingDates(newBooking);
         validateBookingPeriod(newBooking.getItemId(), newBooking.getStart(), newBooking.getEnd());
@@ -53,12 +54,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long ownerId) {
-        Booking booking = validationBooking(bookingId);
+        Booking booking = validateBooking(bookingId);
         if (!ownerId.equals(booking.getItem().getOwner().getId())) {
             log.warn("Вносить изменения в параметры booking может только владелец вещи!");
             throw new ValidationException("Вносить изменения в параметры booking может только владелец вещи!");
         }
-        validationUser(ownerId);
+        validateUser(ownerId);
         BookingStatus newStatus = approved ? BookingStatus.APPROVED : BookingStatus.REJECTED;
         booking.setStatus(newStatus);
         Booking updatedBooking = bookingRepository.save(booking);
@@ -68,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getBooking(Long bookingId, Long userId) {
-        Booking booking = validationBooking(bookingId);
+        Booking booking = validateBooking(bookingId);
         if (!(userId.equals(booking.getBooker().getId()) || userId.equals(booking.getItem().getOwner().getId()))) {
             log.warn("Просматривать данные бронирования может только владелец вещи или автор бронирования!");
             throw new ValidationException(
@@ -81,37 +82,37 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingDto> getAllBookingsByUser(BookingStatus status, Long bookerId) {
-        validationUser(bookerId);
+        validateUser(bookerId);
+        List<Booking> bookings;
+
         if (status == null) {
-            return bookingRepository.findByBookerIdOrderByStartDesc(bookerId)
-                    .stream()
-                    .map(BookingMapper::mapToBookingDto)
-                    .collect(Collectors.toList());
+            bookings = bookingRepository.findByBookerIdOrderByStartDesc(bookerId);
         } else {
-            return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, status)
-                    .stream()
-                    .map(BookingMapper::mapToBookingDto)
-                    .collect(Collectors.toList());
+            bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, status);
         }
+
+        return bookings.stream()
+                .map(BookingMapper::mapToBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Collection<BookingDto> getAllBookingsByItemByUserId(BookingStatus status, Long userId) {
-        validationUser(userId);
+        validateUser(userId);
+        List<Booking> bookings;
+
         if (status == null) {
-            return bookingRepository.findAllBookingsByItemByUserId(userId)
-                    .stream()
-                    .map(BookingMapper::mapToBookingDto)
-                    .collect(Collectors.toList());
+            bookings = bookingRepository.findAllBookingsByItemByUserId(userId);
         } else {
-            return bookingRepository.findAllBookingsByItemByUserIdAndStatus(userId, status)
-                    .stream()
-                    .map(BookingMapper::mapToBookingDto)
-                    .collect(Collectors.toList());
+            bookings = bookingRepository.findAllBookingsByItemByUserIdAndStatus(userId, status);
         }
+
+        return bookings.stream()
+                .map(BookingMapper::mapToBookingDto)
+                .collect(Collectors.toList());
     }
 
-    private Booking validationBooking(Long bookingId) {
+    private Booking validateBooking(Long bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> {
                     log.warn("Бронирование с id = {} не найдено", bookingId);
@@ -126,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private User validationUser(Long userId) {
+    private User validateUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.warn("Пользователь с id = {} не найден", userId);
