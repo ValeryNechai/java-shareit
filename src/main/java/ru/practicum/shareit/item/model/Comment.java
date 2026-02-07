@@ -5,12 +5,12 @@ import lombok.*;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "comments")
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,17 +30,4 @@ public class Comment {
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Comment comment = (Comment) object;
-        return Objects.equals(id, comment.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

@@ -14,6 +14,7 @@ import java.util.Objects;
 @Table(name = "items")
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,17 +35,4 @@ public class Item {
     @OneToOne
     @JoinColumn(name = "request_id")
     private ItemRequest request;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Item item = (Item) object;
-        return Objects.equals(id, item.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
