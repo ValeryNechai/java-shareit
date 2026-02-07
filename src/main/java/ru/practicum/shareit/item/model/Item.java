@@ -5,8 +5,6 @@ import lombok.*;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
-import java.util.Objects;
-
 /**
  * TODO Sprint add-controllers.
  */
