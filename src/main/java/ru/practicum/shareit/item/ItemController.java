@@ -1,11 +1,9 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
@@ -14,14 +12,10 @@ import java.util.Collection;
  * TODO Sprint add-controllers.
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
-    ItemService itemService;
-
-    @Autowired
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
+    private final ItemService itemService;
 
     @PostMapping
     public ItemDto createItem(@Valid @RequestBody NewItemRequest item,
@@ -37,17 +31,24 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
+    public ItemWithCommentsDto getItem(@PathVariable Long itemId) {
         return itemService.getItem(itemId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public Collection<ItemWithCommentsDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
         return itemService.getOwnerItems(ownerId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> searchItem(@RequestParam String text) {
         return itemService.searchItem(text);
+    }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto createComment(@PathVariable Long itemId,
+                                    @Valid @RequestBody NewCommentRequest newComment,
+                                    @RequestHeader("X-Sharer-User-Id") Long authorId) {
+        return itemService.createComment(itemId, newComment, authorId);
     }
 }
