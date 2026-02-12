@@ -15,14 +15,13 @@ import java.time.LocalDateTime;
 @Table(name = "requests")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "id не может быть null.")
-    @EqualsAndHashCode.Include
     private Long id;
 
     @NotNull(message = "Описание запрашиваемой вещи не может быть null.")
@@ -35,5 +34,5 @@ public class ItemRequest {
     private User requester;
 
     @Column(name = "created_date")
-    private LocalDateTime created = LocalDateTime.now();
+    private LocalDateTime created;
 }

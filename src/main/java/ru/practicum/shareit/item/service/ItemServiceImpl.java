@@ -17,6 +17,8 @@ import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dao.UserRepository;
 
@@ -36,16 +38,20 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
-    public ItemDto createItem(NewItemRequest newItem, Long ownerId) {
+    public ItemDto createItem(NewItemDto newItem, Long ownerId) {
         User owner = validateUser(ownerId);
+        ItemRequest itemRequest = validateItemRequest(newItem.getRequestId());
+
         Item item = Item.builder()
                 .name(newItem.getName())
                 .description(newItem.getDescription())
                 .available(newItem.getAvailable())
                 .owner(owner)
+                .request(itemRequest)
                 .build();
         Item createdItem = itemRepository.save(item);
         log.debug("Вещь {} успешно добавлена.", item.getName());
@@ -164,6 +170,14 @@ public class ItemServiceImpl implements ItemService {
                     log.warn("Item с id = {} не найден", itemId);
                     return new NotFoundException("Item с id = " + itemId + " не найдена.");
                 });
+    }
+
+    private ItemRequest validateItemRequest(Long requestId) {
+        return requestId != null ? itemRequestRepository.findById(requestId)
+                .orElseThrow(() -> {
+                    log.warn("Запрос вещи с id = {} не найден", requestId);
+                    return new NotFoundException("Запрос вещи с id = " + requestId + " не найден.");
+                }) : null;
     }
 
     private ItemWithCommentsDto convertToItemWithCommentsDto(Item item, List<Booking> itemBookings,

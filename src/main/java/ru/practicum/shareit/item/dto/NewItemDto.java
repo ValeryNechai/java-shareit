@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class NewItemRequest {
+public class NewItemDto {
     @NotBlank(message = "Название вещи не может быть пустым или null.")
     private String name;
 
@@ -16,4 +16,6 @@ public class NewItemRequest {
 
     @NotNull(message = "Доступность вещи должна быть указана.")
     private Boolean available;
+
+    private Long requestId;
 }

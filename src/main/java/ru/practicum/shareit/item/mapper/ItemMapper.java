@@ -29,6 +29,14 @@ public final class ItemMapper {
                 .build();
     }
 
+    public static ItemForItemRequestDto mapToItemForItemRequestDto(Item item) {
+        return ItemForItemRequestDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .ownerId(item.getOwner().getId())
+                .build();
+    }
+
     public static Item updateItemFields(Item item, UpdateItemRequest request) {
         if (request.hasName()) {
             item.setName(request.getName());
