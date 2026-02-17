@@ -77,7 +77,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<Item> items = itemRepository.findAll();
 
         return itemRequests.stream()
-                .filter(itemRequest -> itemRequest.getRequester().getId() != requesterId)
+                .filter(itemRequest -> !itemRequest.getRequester().getId().equals(requesterId))
                 .map(itemRequest -> {
                     List<ItemForItemRequestDto> itemsForItemRequest = items.stream()
                             .filter(item -> item.getRequest() != null &&
