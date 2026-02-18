@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
@@ -58,6 +59,31 @@ class UserControllerTest {
 
     @SneakyThrows
     @Test
+    void updateUser_whenUserIsValid_thenReturnedOk() {
+        long userId = 1L;
+        UpdateUserRequest userToUpdate = new UpdateUserRequest();
+        userToUpdate.setEmail("aaaaaa@mail.ru");
+        UserDto expectedUser = UserDto.builder()
+                .id(userId)
+                .name("Name")
+                .email("aaaaaa@mail.ru")
+                .build();
+        when(userService.updateUser(userId, userToUpdate)).thenReturn(expectedUser);
+
+        String result = mockMvc.perform(patch("/users/{userId}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userToUpdate)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertEquals(objectMapper.writeValueAsString(expectedUser), result);
+        verify(userService, times(1)).updateUser(userId, userToUpdate);
+    }
+
+    @SneakyThrows
+    @Test
     void updateUser_whenUserIsNotValid_thenReturnedBadRequest() {
         long userId = 1L;
         UpdateUserRequest userToUpdate = new UpdateUserRequest();
@@ -66,7 +92,8 @@ class UserControllerTest {
         mockMvc.perform(patch("/users/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userToUpdate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
 
         verify(userService, never()).updateUser(userId, userToUpdate);
     }

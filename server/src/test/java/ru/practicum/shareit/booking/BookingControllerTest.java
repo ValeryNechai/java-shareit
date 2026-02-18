@@ -61,6 +61,33 @@ class BookingControllerTest {
 
     @SneakyThrows
     @Test
+    void createBooking_whenBookingIsValid_ThenReturnedOk() {
+        long bookerId = 0L;
+        NewBookingRequest bookingToCreate = new NewBookingRequest();
+        bookingToCreate.setItemId(1L);
+        bookingToCreate.setStart(LocalDateTime.now().plusDays(1));
+        bookingToCreate.setEnd(LocalDateTime.now().plusDays(3));
+        BookingDto expectedBooking = BookingDto.builder()
+                .id(2L)
+                .start(bookingToCreate.getStart())
+                .end(bookingToCreate.getEnd())
+                .build();
+        when(bookingService.createBooking(bookingToCreate, bookerId)).thenReturn(expectedBooking);
+
+        String result = mockMvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", bookerId)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(bookingToCreate)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertEquals(objectMapper.writeValueAsString(expectedBooking), result);
+    }
+
+    @SneakyThrows
+    @Test
     void updateBookingStatus_whenUpdateApproved_ThenReturnedOk() {
         long bookingId = 0L;
         boolean approved = true;
