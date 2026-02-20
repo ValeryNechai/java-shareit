@@ -238,6 +238,19 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
+    void getOtherUserRequests_whenRequestsEmpty_thenReturnEmptyList() {
+        List<ItemRequest> otherUserRequests = List.of();
+
+        when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
+        when(itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(requester.getId()))
+                .thenReturn(otherUserRequests);
+
+        List<ItemRequestDto> result = itemRequestService.getOtherUserRequests(requester.getId());
+
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
     void getOtherUserRequests_whenUserNotFound_thenThrowNotFoundException() {
         when(userRepository.findById(requester.getId())).thenReturn(Optional.empty());
 

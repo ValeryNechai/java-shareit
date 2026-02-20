@@ -7,11 +7,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.BookingController;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ErrorHandler.class)
@@ -36,5 +39,17 @@ class ErrorHandlerTest {
                         .header("X-Sharer-User-Id", ownerId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void handleNotFound_whenNotFoundException_thenReturn404() throws Exception {
+        long bookingId = 0L;
+        long userId = 1L;
+        when(bookingController.getBooking(any(), any()))
+                .thenThrow(new NotFoundException("Booking с id = " + bookingId + " не найден."));
+
+        mockMvc.perform(get("/bookings/{bookingId}", bookingId)
+                        .header("X-Sharer-User-Id", userId))
+                .andExpect(status().isNotFound());
     }
 }
