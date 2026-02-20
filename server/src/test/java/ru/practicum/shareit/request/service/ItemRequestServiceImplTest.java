@@ -178,7 +178,7 @@ class ItemRequestServiceImplTest {
         List<Item> items = List.of(item);
 
         when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
-        when(itemRequestRepository.findByRequesterId(requester.getId())).thenReturn(requests);
+        when(itemRequestRepository.findByRequesterIdOrderByCreatedDesc(requester.getId())).thenReturn(requests);
         when(itemRepository.findByRequestIdIn(List.of(itemRequest.getId()))).thenReturn(items);
 
         List<ItemRequestDto> result = itemRequestService.getItemRequestsByRequester(requester.getId());
@@ -196,7 +196,7 @@ class ItemRequestServiceImplTest {
         List<ItemRequest> requests = List.of(itemRequest);
 
         when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
-        when(itemRequestRepository.findByRequesterId(requester.getId())).thenReturn(requests);
+        when(itemRequestRepository.findByRequesterIdOrderByCreatedDesc(requester.getId())).thenReturn(requests);
         when(itemRepository.findByRequestIdIn(List.of(itemRequest.getId()))).thenReturn(Collections.emptyList());
 
         List<ItemRequestDto> result = itemRequestService.getItemRequestsByRequester(requester.getId());
@@ -213,19 +213,23 @@ class ItemRequestServiceImplTest {
                 () -> itemRequestService.getItemRequestsByRequester(requester.getId()));
 
         assertThat(exception.getMessage()).contains("Пользователь", "не найден");
-        verify(itemRequestRepository, never()).findByRequesterId(anyLong());
+        verify(itemRequestRepository, never()).findByRequesterIdOrderByCreatedDesc(anyLong());
     }
 
     @Test
-    void getAllItemRequests_whenRequestsExist_thenReturnOnlyOtherUsersRequests() {
-        List<ItemRequest> allRequests = List.of(itemRequest, anotherItemRequest);
-        List<Item> allItems = List.of(item, anotherItem);
+    void getOtherUserRequests_whenRequestsExist_thenReturnOnlyOtherUsersRequests() {
+        List<ItemRequest> otherUserRequests = List.of(anotherItemRequest);
+        List<Long> requestIds = otherUserRequests.stream()
+                .map(ItemRequest::getId)
+                .toList();
+        List<Item> items = List.of(anotherItem);
 
         when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
-        when(itemRequestRepository.findAll()).thenReturn(allRequests);
-        when(itemRepository.findAll()).thenReturn(allItems);
+        when(itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(requester.getId()))
+                .thenReturn(otherUserRequests);
+        when(itemRepository.findByRequestIdIn(requestIds)).thenReturn(items);
 
-        List<ItemRequestDto> result = itemRequestService.getAllItemRequests(requester.getId());
+        List<ItemRequestDto> result = itemRequestService.getOtherUserRequests(requester.getId());
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(anotherItemRequest.getId());
@@ -234,11 +238,11 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllItemRequests_whenUserNotFound_thenThrowNotFoundException() {
+    void getOtherUserRequests_whenUserNotFound_thenThrowNotFoundException() {
         when(userRepository.findById(requester.getId())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemRequestService.getAllItemRequests(requester.getId()));
+                () -> itemRequestService.getOtherUserRequests(requester.getId()));
 
         assertThat(exception.getMessage()).contains("Пользователь", "не найден");
         verify(itemRequestRepository, never()).findAll();

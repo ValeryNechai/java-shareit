@@ -17,8 +17,9 @@ import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dao.UserRepository;
 
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,44 +51,42 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getItemRequestsByRequester(Long requesterId) {
         validateUser(requesterId);
 
-        List<ItemRequest> itemRequests = itemRequestRepository.findByRequesterId(requesterId);
+        List<ItemRequest> itemRequests = itemRequestRepository.findByRequesterIdOrderByCreatedDesc(requesterId);
+
+        if (itemRequests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<Long> itemRequestsIds = itemRequests.stream()
                 .map(ItemRequest::getId)
                 .toList();
+
         List<Item> items = itemRepository.findByRequestIdIn(itemRequestsIds);
 
-        return itemRequests.stream()
-                .map(itemRequest -> {
-                    List<ItemForItemRequestDto> itemsForItemRequest = items.stream()
-                            .filter(item -> item.getRequest() != null &&
-                                    item.getRequest().getId().equals(itemRequest.getId()))
-                            .map(ItemMapper::mapToItemForItemRequestDto)
-                            .toList();
-                    return ItemRequestMapper.mapToItemRequestDto(itemRequest, itemsForItemRequest);
-                })
-                .sorted(Comparator.comparing(ItemRequestDto::getCreated).reversed())
-                .collect(Collectors.toList());
+        return createAndSortedListItemRequestDto(itemRequests, items);
     }
 
     @Override
-    public List<ItemRequestDto> getAllItemRequests(Long requesterId) {
+    public List<ItemRequestDto> getOtherUserRequests(Long requesterId) {
         validateUser(requesterId);
 
-        List<ItemRequest> itemRequests = itemRequestRepository.findAll();
-        List<Item> items = itemRepository.findAll();
+        /*
+        учитывая, что запрос стоит: выбери запросы всех, кроме запросов requesterId,
+        то тут в принципе будет перегруз))
+         */
+        List<ItemRequest> otherUserRequests =
+                itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(requesterId);
 
-        return itemRequests.stream()
-                .filter(itemRequest -> !itemRequest.getRequester().getId().equals(requesterId))
-                .map(itemRequest -> {
-                    List<ItemForItemRequestDto> itemsForItemRequest = items.stream()
-                            .filter(item -> item.getRequest() != null &&
-                                    item.getRequest().getId().equals(itemRequest.getId()))
-                            .map(ItemMapper::mapToItemForItemRequestDto)
-                            .toList();
-                    return ItemRequestMapper.mapToItemRequestDto(itemRequest, itemsForItemRequest);
-                })
-                .sorted(Comparator.comparing(ItemRequestDto::getCreated).reversed())
-                .collect(Collectors.toList());
+        if (otherUserRequests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> requestIds = otherUserRequests.stream()
+                .map(ItemRequest::getId)
+                .toList();
+        List<Item> items = itemRepository.findByRequestIdIn(requestIds);
+
+        return createAndSortedListItemRequestDto(otherUserRequests, items);
     }
 
     @Override
@@ -115,5 +114,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                     log.warn("Запрос вещи с id = {} не найден", requestId);
                     return new NotFoundException("Запрос вещи с id = " + requestId + " не найден.");
                 });
+    }
+
+    private List<ItemRequestDto> createAndSortedListItemRequestDto(List<ItemRequest> itemRequests,
+                                                                   List<Item> items) {
+        Map<Long, List<ItemForItemRequestDto>> itemsMap = groupItemsByRequestId(items);
+
+        return itemRequests.stream()
+                .map(itemRequest -> ItemRequestMapper.mapToItemRequestDto(
+                        itemRequest,
+                        itemsMap.getOrDefault(itemRequest.getId(), Collections.emptyList())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private Map<Long, List<ItemForItemRequestDto>> groupItemsByRequestId(List<Item> items) {
+        return items.stream()
+                .filter(item -> item.getRequest() != null)
+                .collect(Collectors.groupingBy(
+                        item -> item.getRequest().getId(),
+                        Collectors.mapping(ItemMapper::mapToItemForItemRequestDto,
+                                Collectors.toList()
+                        )
+                ));
     }
 }

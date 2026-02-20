@@ -10,7 +10,7 @@ public interface ItemRequestService {
 
     List<ItemRequestDto> getItemRequestsByRequester(Long requesterId);
 
-    List<ItemRequestDto> getAllItemRequests(Long requesterId);
+    List<ItemRequestDto> getOtherUserRequests(Long requesterId);
 
     ItemRequestDto getItemRequestById(Long requestId);
 }

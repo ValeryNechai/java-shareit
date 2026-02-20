@@ -72,7 +72,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void getAllItemRequests() {
+    void getOtherUserRequests() {
         long requesterId = 1L;
 
         mockMvc.perform(get("/requests/all")
@@ -80,7 +80,7 @@ class ItemRequestControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(itemRequestService, times(1)).getAllItemRequests(requesterId);
+        verify(itemRequestService, times(1)).getOtherUserRequests(requesterId);
     }
 
     @SneakyThrows
