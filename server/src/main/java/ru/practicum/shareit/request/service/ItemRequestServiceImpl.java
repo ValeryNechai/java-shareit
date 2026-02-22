@@ -69,7 +69,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getOtherUserRequests(Long requesterId) {
         validateUser(requesterId);
-        
+
         List<ItemRequest> otherUserRequests =
                 itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(requesterId);
 
