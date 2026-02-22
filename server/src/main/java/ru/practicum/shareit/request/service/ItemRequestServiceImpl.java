@@ -69,11 +69,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getOtherUserRequests(Long requesterId) {
         validateUser(requesterId);
-
-        /*
-        учитывая, что запрос стоит: выбери запросы всех, кроме запросов requesterId,
-        то тут в принципе будет перегруз))
-         */
+        
         List<ItemRequest> otherUserRequests =
                 itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(requesterId);
 
